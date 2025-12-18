@@ -239,7 +239,8 @@ const en = {
   'Move to top': 'Move to top',
   'Move to bottom': 'Move to bottom',
   'Move to list': 'Move to list',
-
+  'Move to board': 'Move to board',
+  
   // components/Lane/LaneForm.tsx
   'Enter list title...': 'Enter list title...',
   'Mark cards in this list as complete': 'Mark cards in this list as complete',

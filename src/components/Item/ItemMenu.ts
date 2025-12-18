@@ -3,7 +3,8 @@ import { Menu, Platform, TFile, TFolder } from 'obsidian';
 import { Dispatch, StateUpdater, useCallback } from 'preact/hooks';
 import { StateManager } from 'src/StateManager';
 import { Path } from 'src/dnd/types';
-import { moveEntity } from 'src/dnd/util/data';
+import { moveEntity, removeEntity, getEntityFromPath } from 'src/dnd/util/data';
+import { getBoardsList, moveCardToBoard, getMovementParam } from 'src/dnd/util/boards';										   
 import { t } from 'src/lang/helpers';
 
 import { BoardModifiers } from '../../helpers/boardModifiers';
@@ -265,13 +266,67 @@ export function useItemMenu({
 
       menu.addSeparator();
 
+	  const addMoveToBoardOptions = (menu: Menu) => {
+		//get array boards with tag #kanban_movement and property kanban-movement-id
+		
+		let boards = getBoardsList(stateManager.file.path)
+
+		if (boards.length === 0) {
+		  menu.addItem((item) =>
+            item
+              .setTitle("There are no boards. Check the kanban_movement_id (if set) or the availability of other boards")
+          );
+		}
+        for (let i = 0, len = boards.length; i < len; i++) {
+          menu.addItem((item) =>
+            item
+              .setIcon('lucide-folder-kanban')
+              .setTitle(boards[i].name)
+              .onClick(() => {
+                stateManager.setState((boardData) => {
+					const boardPath = boards[i].path
+					const cardTextRaw = getEntityFromPath(boardData, path).data.titleRaw
+					const cardTextCheckChar = getEntityFromPath(boardData, path).data.checkChar
+					const cardText = '- ['+cardTextCheckChar+'] '+cardTextRaw
+					
+					moveCardToBoard(boardPath, cardText)
+					return removeEntity(boardData, path)
+                  //return moveEntityToBoard(boardData, path, boards[i].path);
+                });
+				
+              })
+          );
+        }
+      };
+		
+	  const currentCache = this.app.metadataCache.getCache(stateManager.file.path) 
+	  const frontmatter = currentCache?.frontmatter
+	  const kanbanMovement = getMovementParam(frontmatter, "kanban-movement")
+      const kanbanMovementOutput = getMovementParam(frontmatter, "kanban-movement-output") ?? kanbanMovement
+
+	  if (kanbanMovementOutput !== 'disallow') {
+		  if (Platform.isPhone) {
+			addMoveToBoardOptions(menu);
+			menu.addSeparator();
+		  } else {
+			menu.addItem((item) => {
+			  const submenu = (item as any)
+				.setTitle(t('Move to board'))
+				.setIcon('lucide-folder-kanban')
+				.setSubmenu();
+
+			  addMoveToBoardOptions(submenu);
+			});
+		  }
+	  };
+
       const addMoveToOptions = (menu: Menu) => {
         const lanes = stateManager.state.children;
         if (lanes.length <= 1) return;
         for (let i = 0, len = lanes.length; i < len; i++) {
           menu.addItem((item) =>
             item
-              .setIcon('lucide-square-kanban')
+              .setIcon('lucide-kanban')
               .setChecked(path[0] === i)
               .setTitle(lanes[i].data.title)
               .onClick(() => {
@@ -290,7 +345,7 @@ export function useItemMenu({
         menu.addItem((item) => {
           const submenu = (item as any)
             .setTitle(t('Move to list'))
-            .setIcon('lucide-square-kanban')
+            .setIcon('lucide-kanban')
             .setSubmenu();
 
           addMoveToOptions(submenu);

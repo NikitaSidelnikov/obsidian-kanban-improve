@@ -185,6 +185,8 @@ const lang: Partial<Lang> = {
   'Add label': 'Добавить ярлык',
   'Move to top': 'Переместить вверх',
   'Move to bottom': 'Переместить вниз',
+  'Move to list': 'Переместить на лист',
+  'Move to board': 'Переместить на доску',									   
 
   // components/Lane/LaneForm.tsx
   'Enter list title...': 'Введите заголовок списка...',
