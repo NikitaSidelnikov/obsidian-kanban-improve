@@ -452,6 +452,33 @@ export default class KanbanPlugin extends Plugin {
               kanbanView.viewSettings[frontmatterKey] || stateManager.getSetting(frontmatterKey);
 
             menu
+			  .addItem((item) =>
+                item
+                  .setTitle(t('Sort by date'))
+				  .setSection('pane')
+                  .setIcon('lucide-arrow-down-up')
+                  .onClick(() => {
+				    stateManager.sortBoardByDates();
+				  })
+              )
+              .addItem((item) =>
+                item
+                  .setTitle(t('Sort by tags'))
+				  .setSection('pane')
+                  .setIcon('lucide-arrow-down-up')
+                  .onClick(() => {
+				    stateManager.sortBoardByTags();
+				  })
+              )
+              .addItem((item) =>
+                item
+                  .setTitle(t('Sort by card text'))
+				  .setSection('pane')
+                  .setIcon('lucide-arrow-down-up')
+                  .onClick(() => {
+				    stateManager.sortBoardByText();
+			  	  })
+              )					     
               .addItem((item) => {
                 item
                   .setTitle(t('Add a list'))
@@ -459,25 +486,6 @@ export default class KanbanPlugin extends Plugin {
                   .setSection('pane')
                   .onClick(() => {
                     kanbanView.emitter.emit('showLaneForm', undefined);
-                  });
-              })
-              .addItem((item) => {
-                item
-                  .setTitle(t('Archive completed cards'))
-                  .setIcon('lucide-archive')
-                  .setSection('pane')
-                  .onClick(() => {
-                    stateManager.archiveCompletedCards();
-                  });
-              })
-              .addItem((item) => {
-                item
-                  .setTitle(t('Archive completed cards'))
-                  .setIcon('lucide-archive')
-                  .setSection('pane')
-                  .onClick(() => {
-                    const stateManager = this.stateManagers.get(file);
-                    stateManager.archiveCompletedCards();
                   });
               })
               .addItem((item) =>

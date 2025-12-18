@@ -5,7 +5,7 @@ import { useEffect, useState } from 'preact/compat';
 import { KanbanView } from './KanbanView';
 import { KanbanSettings, SettingRetrievers } from './Settings';
 import { getDefaultDateFormat, getDefaultTimeFormat } from './components/helpers';
-import { Board, BoardTemplate, Item } from './components/types';
+import { Board, BoardTemplate, Item , LaneSort} from './components/types';
 import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
@@ -247,6 +247,8 @@ export class StateManager {
       'metadata-keys': metadataKeys,
       'archive-date-separator': this.getSettingRaw('archive-date-separator') || '',
       'archive-date-format': archiveDateFormat,
+	  'sort-marked-cards-end': this.getSettingRaw('sort-marked-cards-end', suppliedSettings) ?? true,
+	  'show-sort-board': this.getSettingRaw('show-sort-board', suppliedSettings) ?? true,																					  
       'show-add-list': this.getSettingRaw('show-add-list', suppliedSettings) ?? true,
       'show-archive-all': this.getSettingRaw('show-archive-all', suppliedSettings) ?? true,
       'show-view-as-markdown':
@@ -419,6 +421,154 @@ export class StateManager {
       this.setError(e);
     }
   }
+  
+  async sortBoardByDates() {
+    const board = this.state;
+	
+	const lanes = board.children.map((lane) => {
+	  const children = lane.children.slice();
+      const mod = lane.data.sorted === LaneSort.DateAsc ? -1 : 1;
+      children.sort((a, b) => {
+	  	if (this.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		if (this.getSetting('sort-marked-cards-end') && b.data.checked) return -1;
+
+	    const aDate: moment.Moment | undefined =
+	      a.data.metadata.time || a.data.metadata.date;
+	    const bDate: moment.Moment | undefined =
+	      b.data.metadata.time || b.data.metadata.date;
+
+	    if (aDate && !bDate) return -1 * mod;
+	    if (bDate && !aDate) return 1 * mod;
+	    if (!aDate && !bDate) return 0;
+
+	    return (aDate.isBefore(bDate) ? -1 : 1) * mod;
+      });
+      return update(lane, {
+        children: {
+          $set: children,
+        },
+		data: {
+		  sorted: {
+		    $set:
+		      lane.data.sorted === LaneSort.DateAsc ? LaneSort.DateDsc : LaneSort.DateAsc,
+		  },
+		},
+      });
+    });
+	
+	try {
+      this.setState(
+        update(board, {
+          children: {
+            $set: lanes,
+          },
+        })
+      );
+    } catch (e) {
+      this.setError(e);
+    }
+  }
+
+  async sortBoardByTags() {
+    const board = this.state;
+	
+	const lanes = board.children.map((lane) => {
+	  const tagSortOrder = this.getSetting('tag-sort');
+	  const children = lane.children.slice();
+	  const desc = lane.data.sorted === LaneSort.TagsAsc ? true : false;
+
+	  children.sort((a, b) => {
+	  	if (this.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		if (this.getSetting('sort-marked-cards-end') && b.data.checked) return -1;
+	  
+		const tagsA = a.data.metadata.tags;
+		const tagsB = b.data.metadata.tags;
+
+		if (!tagsA?.length && !tagsB?.length) return 0;
+		if (!tagsA?.length) return 1;
+		if (!tagsB?.length) return -1;
+
+		const aSortOrder =
+		  tagSortOrder?.findIndex((sort) => tagsA.includes(sort.tag)) ?? -1;
+		const bSortOrder =
+		  tagSortOrder?.findIndex((sort) => tagsB.includes(sort.tag)) ?? -1;
+
+		if (aSortOrder > -1 && bSortOrder < 0) return desc ? 1 : -1;
+		if (bSortOrder > -1 && aSortOrder < 0) return desc ? -1 : 1;
+		if (aSortOrder > -1 && bSortOrder > -1) {
+		  return desc ? bSortOrder - aSortOrder : aSortOrder - bSortOrder;
+		}
+
+		if (desc) return defaultSort(tagsB.join(''), tagsA.join(''));
+		return defaultSort(tagsA.join(''), tagsB.join(''));
+	  });
+      return update(lane, {
+        children: {
+          $set: children,
+        },
+		data: {
+		  sorted: {
+		    $set:
+		      lane.data.sorted === LaneSort.TagsAsc ? LaneSort.TagsDsc : LaneSort.TagsAsc,
+		  },
+		},
+      });
+    });
+	
+	try {
+      this.setState(
+        update(board, {
+          children: {
+            $set: lanes,
+          },
+        })
+      );
+    } catch (e) {
+      this.setError(e);
+    }
+  }
+  
+  async sortBoardByText() {
+    const board = this.state;
+	
+	const lanes = board.children.map((lane) => {
+	  const children = lane.children.slice();
+	  const isAsc = lane.data.sorted === LaneSort.TitleAsc;
+
+	  children.sort((a, b) => {
+	  	if (this.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		if (this.getSetting('sort-marked-cards-end') && b.data.checked) return -1;
+	    if (isAsc) {
+		  return b.data.title.localeCompare(a.data.title);
+	    }
+
+	    return a.data.title.localeCompare(b.data.title);
+	  });
+      return update(lane, {
+        children: {
+          $set: children,
+        },
+		data: {
+		  sorted: {
+		    $set:
+              lane.data.sorted === LaneSort.TitleAsc? LaneSort.TitleDsc: LaneSort.TitleAsc,
+		  },
+		},
+      });
+    });
+	
+	try {
+      this.setState(
+        update(board, {
+          children: {
+            $set: lanes,
+          },
+        })
+      );
+    } catch (e) {
+      this.setError(e);
+    }
+  }  
 
   getNewItem(content: string, checkChar: string, forceEdit?: boolean) {
     return this.parser.newItem(content, checkChar, forceEdit);

@@ -476,6 +476,48 @@ export class KanbanView extends TextFileView implements HoverParent {
       this.actionButtons['show-add-list'].remove();
       delete this.actionButtons['show-add-list'];
     }
+	
+	if (stateManager.getSetting('show-sort-board') && !this.actionButtons['show-sort-board']) {
+      this.actionButtons['show-sort-board'] = this.addAction(
+        'lucide-arrow-down-up',
+        t('Sort board'),
+        (evt) => {
+          const view = this.viewSettings[frontmatterKey] || stateManager.getSetting(frontmatterKey);
+          new Menu()
+            .addItem((item) =>
+              item
+                .setTitle(t('Sort by date'))
+                .setIcon('lucide-calendar-fold')
+                .onClick(() => {
+				  const stateManager = this.plugin.stateManagers.get(this.file);
+				  stateManager.sortBoardByDates();
+				})
+            )
+            .addItem((item) =>
+              item
+                .setTitle(t('Sort by tags'))
+                .setIcon('lucide-tag')
+                .onClick(() => {
+				  const stateManager = this.plugin.stateManagers.get(this.file);
+				  stateManager.sortBoardByTags();
+				})
+            )
+            .addItem((item) =>
+              item
+                .setTitle(t('Sort by card text'))
+                .setIcon('lucide-a-large-small')
+                .onClick(() => {
+				  const stateManager = this.plugin.stateManagers.get(this.file);
+				  stateManager.sortBoardByText();
+				})
+            )
+            .showAtMouseEvent(evt);
+        }
+      );
+    } else if (!stateManager.getSetting('show-sort-board') && this.actionButtons['show-sort-board']) {
+      this.actionButtons['show-sort-board'].remove();
+      delete this.actionButtons['show-sort-board'];
+    }
   };
 
   clear() {
