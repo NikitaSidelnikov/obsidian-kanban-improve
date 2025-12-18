@@ -19,6 +19,7 @@ const en = {
   'Board view': 'Board view',
 
   // KanbanView.tsx
+  'Sort board': 'Sort all cards on each lists of board',														
   'Open as markdown': 'Open as markdown',
   'Open board settings': 'Open board settings',
   'Archive completed cards': 'Archive completed cards',
@@ -98,6 +99,8 @@ const en = {
   "When toggled, cards will display the distance between today and the card's date. eg. 'In 3 days', 'A month ago'. Relative dates will not be shown for dates from the Tasks and Dataview plugins.":
     "When toggled, cards will display the distance between today and the card's date. eg. 'In 3 days', 'A month ago'. Relative dates will not be shown for dates from the Tasks and Dataview plugins.",
 
+  'Always sort marked cards at the end': 'Always sort marked cards at the end',
+  'Regardless of the type of sorting, marked  cards will always be placed at the end': 'Regardless of the type of sorting, marked  cards will always be placed at the end',																			   
   'Move dates to card footer': 'Move dates to card footer',
   "When toggled, dates will be displayed in the card's footer instead of the card's body.":
     "When toggled, dates will be displayed in the card's footer instead of the card's body.",

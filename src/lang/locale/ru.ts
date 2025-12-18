@@ -15,6 +15,7 @@ const lang: Partial<Lang> = {
   'Toggle between Kanban and markdown mode': 'Переключиться между Kanban и markdown режимами',
 
   // KanbanView.tsx
+  'Sort board': 'Сортировать все карточки на доске',																				 
   'Open as markdown': 'Открыть как markdown',
   'Open board settings': 'Открыть настройки доски',
   'Archive completed cards': 'Архивировать завершённые карточки',
@@ -59,6 +60,8 @@ const lang: Partial<Lang> = {
     'Этот шаблон будет использоваться при создании новых заметок из карточек Kanban.',
   'No template': 'Нет шаблона',
   'Note folder': 'Директория заметок',
+  'Always sort marked cards at the end': 'Всегда сортировать отмеченные карточки в конец',
+  'Regardless of the type of sorting, marked  cards will always be placed at the end': 'В независимости от типа сортировки отмеченные карточки всегда будут помещаться в конец',																																																													   
   'Notes created from Kanban cards will be placed in this folder. If blank, they will be placed in the default location for this vault.':
     'В эту папку будут помещены заметки, созданные из карточек Kanban. Если поле пустое, они будут помещены в папку по умолчанию для этого хранилища.',
   'Default folder': 'Директория по умолчанию',
@@ -209,8 +212,10 @@ const lang: Partial<Lang> = {
   'Delete list': 'Удалить список',
   'Insert list before': 'Вставить список до',
   'Insert list after': 'Вставить список после',
-  'Sort by card text': 'Сортировать по тексту карточки',
+  'Sort by card text': 'Сортировать по тексту',
   'Sort by date': 'Сортировать по дате',
+  'Sort by tags': 'Сортировать по тегам',
+  'Sort by': 'Сортировать',														   
 
   // components/helpers/renderMarkdown.ts
   'Unable to find': 'Невозможно найти',

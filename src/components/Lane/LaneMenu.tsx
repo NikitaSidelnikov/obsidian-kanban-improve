@@ -163,7 +163,9 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
             const isAsc = lane.data.sorted === LaneSort.TitleAsc;
 
             children.sort((a, b) => {
-              if (isAsc) {
+			  if (stateManager.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		      if (stateManager.getSetting('sort-marked-cards-end') && b.data.checked) return -1;
+			  if (isAsc) {
                 return b.data.title.localeCompare(a.data.title);
               }
 
@@ -199,6 +201,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
               const mod = lane.data.sorted === LaneSort.DateAsc ? -1 : 1;
 
               children.sort((a, b) => {
+			    if (stateManager.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		        if (stateManager.getSetting('sort-marked-cards-end') && b.data.checked) return -1;																																														
                 const aDate: moment.Moment | undefined =
                   a.data.metadata.time || a.data.metadata.date;
                 const bDate: moment.Moment | undefined =
@@ -240,6 +244,8 @@ export function useSettingsMenu({ setEditState, path, lane }: UseSettingsMenuPar
               const desc = lane.data.sorted === LaneSort.TagsAsc ? true : false;
 
               children.sort((a, b) => {
+			    if (stateManager.getSetting('sort-marked-cards-end') && a.data.checked) return 1;
+		        if (stateManager.getSetting('sort-marked-cards-end') && b.data.checked) return -1;																																													
                 const tagsA = a.data.metadata.tags;
                 const tagsB = b.data.metadata.tags;
 

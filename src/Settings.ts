@@ -76,6 +76,8 @@ export interface KanbanSettings {
   'new-line-trigger'?: 'enter' | 'shift-enter';
   'new-note-folder'?: string;
   'new-note-template'?: string;
+  'sort-marked-cards-end'?: boolean;
+  'show-sort-board'?: boolean;															  
   'show-add-list'?: boolean;
   'show-archive-all'?: boolean;
   'show-board-settings'?: boolean;
@@ -124,6 +126,8 @@ export const settingKeyLookup: Set<keyof KanbanSettings> = new Set([
   'new-line-trigger',
   'new-note-folder',
   'new-note-template',
+  'sort-marked-cards-end',
+  'show-sort-board',						  				
   'show-add-list',
   'show-archive-all',
   'show-board-settings',
@@ -469,7 +473,45 @@ export class SettingsManager {
           manager: this,
         })
       );
+    new Setting(contentEl)
+      .setName(t('Always sort marked cards at the end'))
+      .setDesc(t('Regardless of the type of sorting, marked  cards will always be placed at the end'))
+      .then((setting) => {
+        let toggleComponent: ToggleComponent;
 
+        setting
+          .addToggle((toggle) => {
+            toggleComponent = toggle;
+
+            const [value, globalValue] = this.getSetting('sort-marked-cards-end', local);
+
+            if (value !== undefined) {
+              toggle.setValue(value as boolean);
+            } else if (globalValue !== undefined) {
+              toggle.setValue(globalValue as boolean);
+            }
+
+            toggle.onChange((newValue) => {
+              this.applySettingsUpdate({
+                'sort-marked-cards-end': {
+                  $set: newValue,
+                },
+              });
+            });
+          })
+          .addExtraButton((b) => {
+            b.setIcon('lucide-rotate-ccw')
+              .setTooltip(t('Reset to default'))
+              .onClick(() => {
+                const [, globalValue] = this.getSetting('sort-marked-cards-end', local);
+                toggleComponent.setValue(!!globalValue);
+
+                this.applySettingsUpdate({
+                  $unset: ['sort-marked-cards-end'],
+                });
+              });
+          });
+      });
     contentEl.createEl('h4', { text: t('Tags') });
 
     new Setting(contentEl)
@@ -1291,6 +1333,45 @@ export class SettingsManager {
 
     contentEl.createEl('h4', { text: t('Board Header Buttons') });
 
+    new Setting(contentEl).setName(t('Sort board')).then((setting) => {
+      let toggleComponent: ToggleComponent;
+
+      setting
+        .addToggle((toggle) => {
+          toggleComponent = toggle;
+
+          const [value, globalValue] = this.getSetting('sort-board', local);
+
+          if (value !== undefined && value !== null) {
+            toggle.setValue(value as boolean);
+          } else if (globalValue !== undefined && globalValue !== null) {
+            toggle.setValue(globalValue as boolean);
+          } else {
+            // default
+            toggle.setValue(true);
+          }
+
+          toggle.onChange((newValue) => {
+            this.applySettingsUpdate({
+              'sort-board': {
+                $set: newValue,
+              },
+            });
+          });
+        })
+        .addExtraButton((b) => {
+          b.setIcon('lucide-rotate-ccw')
+            .setTooltip(t('Reset to default'))
+            .onClick(() => {
+              const [, globalValue] = this.getSetting('sort-board', local);
+              toggleComponent.setValue(!!globalValue);
+
+              this.applySettingsUpdate({
+                $unset: ['sort-board'],
+              });
+            });
+        });
+    });
     new Setting(contentEl).setName(t('Add a list')).then((setting) => {
       let toggleComponent: ToggleComponent;
 
