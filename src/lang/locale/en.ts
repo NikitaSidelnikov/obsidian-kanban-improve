@@ -240,6 +240,7 @@ const en = {
   'Move to bottom': 'Move to bottom',
   'Move to list': 'Move to list',
   'Move to board': 'Move to board',
+  'There are no boards': 'There are no boards. Check the kanban-movement rules for current file',
   
   // components/Lane/LaneForm.tsx
   'Enter list title...': 'Enter list title...',

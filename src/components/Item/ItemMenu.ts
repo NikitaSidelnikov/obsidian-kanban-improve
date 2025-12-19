@@ -274,7 +274,7 @@ export function useItemMenu({
 		if (boards.length === 0) {
 		  menu.addItem((item) =>
             item
-              .setTitle("There are no boards. Check the kanban_movement_id (if set) or the availability of other boards")
+              .setTitle(t("There are no boards"))
           );
 		}
         for (let i = 0, len = boards.length; i < len; i++) {

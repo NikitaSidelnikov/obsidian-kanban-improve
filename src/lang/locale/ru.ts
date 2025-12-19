@@ -186,7 +186,8 @@ const lang: Partial<Lang> = {
   'Move to top': 'Переместить вверх',
   'Move to bottom': 'Переместить вниз',
   'Move to list': 'Переместить на лист',
-  'Move to board': 'Переместить на доску',									   
+  'Move to board': 'Переместить на доску',		
+  'There are no boards': 'Доски не найдены. Проверьте настройки kanban-movement',  
 
   // components/Lane/LaneForm.tsx
   'Enter list title...': 'Введите заголовок списка...',
