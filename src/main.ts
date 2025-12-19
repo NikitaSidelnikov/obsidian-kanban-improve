@@ -451,8 +451,18 @@ export default class KanbanPlugin extends Plugin {
             const boardView =
               kanbanView.viewSettings[frontmatterKey] || stateManager.getSetting(frontmatterKey);
 
-            menu
-			  .addItem((item) =>
+		    let canSortDate = false;
+		    let canSortTags = false;
+            for (let lane of kanbanView.getBoard().children) {
+		      for (let item of lane.children) {
+			    if (!canSortDate && item.data.metadata.date) canSortDate = true;
+			    if (!canSortTags && item.data.metadata.tags?.length) canSortTags = true;
+			    if (canSortDate && canSortTags) break;
+			  }
+			  if (canSortDate && canSortTags) break;
+		    }
+            if (canSortDate) {
+              menu.addItem((item) =>
                 item
                   .setTitle(t('Sort by date'))
 				  .setSection('pane')
@@ -461,7 +471,9 @@ export default class KanbanPlugin extends Plugin {
 				    stateManager.sortBoardByDates();
 				  })
               )
-              .addItem((item) =>
+			}
+			if (canSortTags) {
+              menu.addItem((item) =>
                 item
                   .setTitle(t('Sort by tags'))
 				  .setSection('pane')
@@ -470,6 +482,8 @@ export default class KanbanPlugin extends Plugin {
 				    stateManager.sortBoardByTags();
 				  })
               )
+			}
+			menu
               .addItem((item) =>
                 item
                   .setTitle(t('Sort by card text'))

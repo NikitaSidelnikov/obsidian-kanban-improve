@@ -483,8 +483,21 @@ export class KanbanView extends TextFileView implements HoverParent {
         t('Sort board'),
         (evt) => {
           const view = this.viewSettings[frontmatterKey] || stateManager.getSetting(frontmatterKey);
-          new Menu()
-            .addItem((item) =>
+		  
+		  let canSortDate = false;
+		  let canSortTags = false;
+          for (let lane of this.getBoard().children) {
+		    for (let item of lane.children) {
+			  if (!canSortDate && item.data.metadata.date) canSortDate = true;
+			  if (!canSortTags && item.data.metadata.tags?.length) canSortTags = true;
+			  if (canSortDate && canSortTags) break;
+			}
+			if (canSortDate && canSortTags) break;
+		  }
+		  
+          const menu = new Menu()
+		  if (canSortDate) {
+            menu.addItem((item) =>
               item
                 .setTitle(t('Sort by date'))
                 .setIcon('lucide-calendar-fold')
@@ -493,7 +506,9 @@ export class KanbanView extends TextFileView implements HoverParent {
 				  stateManager.sortBoardByDates();
 				})
             )
-            .addItem((item) =>
+		  }
+		  if (canSortTags) {
+            menu.addItem((item) =>
               item
                 .setTitle(t('Sort by tags'))
                 .setIcon('lucide-tag')
@@ -502,7 +517,9 @@ export class KanbanView extends TextFileView implements HoverParent {
 				  stateManager.sortBoardByTags();
 				})
             )
-            .addItem((item) =>
+		  }
+          menu
+		    .addItem((item) =>
               item
                 .setTitle(t('Sort by card text'))
                 .setIcon('lucide-a-large-small')
@@ -513,7 +530,7 @@ export class KanbanView extends TextFileView implements HoverParent {
             )
             .showAtMouseEvent(evt);
         }
-      );
+      )
     } else if (!stateManager.getSetting('show-sort-board') && this.actionButtons['show-sort-board']) {
       this.actionButtons['show-sort-board'].remove();
       delete this.actionButtons['show-sort-board'];

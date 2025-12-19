@@ -10,6 +10,7 @@ import { ListFormat } from './parsers/List';
 import { BaseFormat, frontmatterKey, shouldRefreshBoard } from './parsers/common';
 import { getTaskStatusDone } from './parsers/helpers/inlineMetadata';
 import { defaultDateTrigger, defaultMetadataPosition, defaultTimeTrigger } from './settingHelpers';
+import { defaultSort } from './helpers/util';
 
 export class StateManager {
   onEmpty: () => void;
