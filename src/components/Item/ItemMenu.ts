@@ -17,7 +17,7 @@ import {
   constructTimePicker,
 } from './helpers';
 
-const recursTasksRegEx = /(🔁[^🔁@#📅⏳✅❌➕🛫]*)/g;
+const symbolsTasksRegEx = /([🔁|🏁|🆔|⛔][^🔁🏁🆔⛔@#📅⏳✅❌➕🛫⏬🔽🔼⏫🔺]*|⏬|🔽|🔼|⏫|🔺)/gu;
 const dateTasksRegEx = /(?:📅|⏳|✅|❌|➕|🛫)\s*\d{4}-\d{2}-\d{2}/g
 const dateRegEx = /@\{\d{4}-\d{2}-\d{2}\}/g;
 const timeRegEx = /@@\{\d{2}:\d{2}\}/g;
@@ -61,7 +61,7 @@ export function useItemMenu({
             .setTitle(t('New note from card'))
             .onClick(async () => {
               const prevTitle = item.data.titleRaw.split('\n')[0].trim();
-			  const recursTasksMatch = prevTitle.match(recursTasksRegEx) || [];
+			  const symbolsTasksMatch = prevTitle.match(symbolsTasksRegEx) || [];
 			  const tagsMatches = prevTitle.match(tagRegEx) || [];
 			  const cardDateTasksMatch = prevTitle.match(dateTasksRegEx) || [];
 			  const cardDateMatch = prevTitle.match(dateRegEx)
@@ -71,7 +71,7 @@ export function useItemMenu({
 			  const removedElements = [].concat(
 				tagsMatches ?? []
 				,cardDateTasksMatch ?? []
-				,recursTasksMatch?[recursTasksMatch[0]]:[]
+				,symbolsTasksMatch ?? []
 				,cardDateMatch?[cardDateMatch[0]]:[]
 				,cardTimeMatch?[cardTimeMatch[0]]:[]
 			  )
