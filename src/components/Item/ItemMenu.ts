@@ -17,11 +17,15 @@ import {
   constructTimePicker,
 } from './helpers';
 
+const recursTasksRegEx = /(🔁[^🔁@#📅⏳✅❌➕🛫]*)/g;
+const dateTasksRegEx = /(?:📅|⏳|✅|❌|➕|🛫)\s*\d{4}-\d{2}-\d{2}/g
+const dateRegEx = /@\{\d{4}-\d{2}-\d{2}\}/g;
+const timeRegEx = /@@\{\d{2}:\d{2}\}/g;
 const illegalCharsRegEx = /[\\/:"*?<>|]+/g;
 const embedRegEx = /!?\[\[([^\]]*)\.[^\]]+\]\]/g;
 const wikilinkRegEx = /!?\[\[([^\]]*)\]\]/g;
 const mdLinkRegEx = /!?\[([^\]]*)\]\([^)]*\)/g;
-const tagRegEx = /#([^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~[\]\\\s\n\r]+)/g;
+const tagRegEx = /#[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~[\]\\\s\n\r]+/g;
 const condenceWhiteSpaceRE = /\s+/g;
 
 interface UseItemMenuParams {
@@ -57,11 +61,29 @@ export function useItemMenu({
             .setTitle(t('New note from card'))
             .onClick(async () => {
               const prevTitle = item.data.titleRaw.split('\n')[0].trim();
-              const sanitizedTitle = prevTitle
+			  const recursTasksMatch = prevTitle.match(recursTasksRegEx) || [];
+			  const tagsMatches = prevTitle.match(tagRegEx) || [];
+			  const cardDateTasksMatch = prevTitle.match(dateTasksRegEx) || [];
+			  const cardDateMatch = prevTitle.match(dateRegEx)
+			  const cardTimeMatch = prevTitle.match(timeRegEx)
+              let sanitizedTitle = prevTitle
+				
+			  const removedElements = [].concat(
+				tagsMatches ?? []
+				,cardDateTasksMatch ?? []
+				,recursTasksMatch?[recursTasksMatch[0]]:[]
+				,cardDateMatch?[cardDateMatch[0]]:[]
+				,cardTimeMatch?[cardTimeMatch[0]]:[]
+			  )
+
+			  removedElements.forEach(el => {
+				sanitizedTitle = sanitizedTitle.replace(el, '');
+			  });
+
+              sanitizedTitle = sanitizedTitle
                 .replace(embedRegEx, '$1')
                 .replace(wikilinkRegEx, '$1')
                 .replace(mdLinkRegEx, '$1')
-                .replace(tagRegEx, '$1')
                 .replace(illegalCharsRegEx, ' ')
                 .trim()
                 .replace(condenceWhiteSpaceRE, ' ');
@@ -89,7 +111,7 @@ export function useItemMenu({
               const newTitleRaw = item.data.titleRaw.replace(
                 prevTitle,
                 stateManager.app.fileManager.generateMarkdownLink(newFile, stateManager.file.path)
-              );
+              )+ ' ' + removedElements.join(' ');
 
               boardModifiers.updateItem(path, stateManager.updateItemContent(item, newTitleRaw));
             });
